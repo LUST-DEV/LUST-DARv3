@@ -1,0 +1,27 @@
+name: Bash CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Syntax, lint and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Check Bash syntax
+        run: |
+          find . -type f \( -name '*.sh' -o -name 'lust-dar' \) -print0 |
+            xargs -0 -r -n1 bash -n
+      - name: ShellCheck
+        run: shellcheck lust-dar install-termux.sh core/*.sh modules/*.sh tests/test_cli.sh
+      - name: Integration tests
+        run: bash tests/test_cli.sh

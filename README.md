@@ -1,139 +1,149 @@
 <div align="center">
+  <img src="assets/lust-dar-banner.jpg" alt="Bannière LUST-DAR fournie par le mainteneur" width="500">
 
-![Bannière LUST-DAR](assets/lust-dar-banner.jpg)
+  <h1>LUST-DAR</h1>
+  <p><strong>Terminal néon pour inventaire et diagnostics locaux</strong></p>
+  <p>Interface sombre, accents cyan/violet et commandes Bash adaptées à Termux et Linux.</p>
 
-# LUST-DAR
-
-### Terminal d’inventaire, de diagnostic et d’audit défensif
-
-**Une base claire pour réunir l’information système, les contrôles locaux et les vérifications réseau autorisées.**
-
-[![Shell](https://img.shields.io/badge/Shell-Bash-121011?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
-[![Plateformes](https://img.shields.io/badge/Plateformes-Linux%20%7C%20Termux-2ea44f)](#plateformes)
-[![Statut](https://img.shields.io/badge/Statut-prototype%20en%20évolution-orange)](#état-du-projet)
-[![Licence](https://img.shields.io/badge/Licence-à%20définir-lightgrey)](#licence)
-
-[Vue d’ensemble](#vue-densemble) · [Fonctions](#fonctions) · [Installation](#installation) · [Sécurité](#sécurité-et-usage-autorisé) · [Feuille de route](ANALYSE_PLAN.md)
-
+  <a href="https://github.com/LUST-DEV/LUST-DARv3"><img alt="Dépôt GitHub" src="https://img.shields.io/badge/GitHub-LUST--DAR-181717?logo=github&logoColor=white"></a>
+  <a href="https://www.gnu.org/software/bash/"><img alt="GNU Bash" src="https://img.shields.io/badge/GNU-Bash-121011?logo=gnubash&logoColor=white"></a>
+  <a href="https://termux.dev/"><img alt="Termux" src="https://img.shields.io/badge/Android-Termux-2ea44f?logo=android&logoColor=white"></a>
+  <a href="https://fontawesome.com/icons/shield-halved"><img alt="Icône bouclier Font Awesome" src="https://img.shields.io/badge/Icon-Shield%20Halved-528DD7?logo=fontawesome&logoColor=white"></a>
+  <br><br>
+  <a href="#installation-termux">Installation</a> ·
+  <a href="#commandes">Commandes</a> ·
+  <a href="#état-actuel">État actuel</a> ·
+  <a href="ANALYSE_PLAN.md">Plan professionnel</a>
 </div>
 
-> **État actuel : prototype.** Le dépôt contient des fonctions de base et nécessite une remise à niveau avant de pouvoir être considéré comme un outil professionnel. Les scans réseau décrits dans la feuille de route ne sont pas encore implémentés. N’utilisez pas ce projet comme preuve d’un audit de sécurité terminé.
+> **Important — projet en développement.** L’outil propose des informations système et des diagnostics locaux simples. Il ne réalise pas encore d’audit de vulnérabilités ni de scan de ports. Aucun scan distant n’est lancé par défaut.
 
-## Vue d’ensemble
+## État actuel
 
-LUST-DAR est un projet de terminal modulaire pour rassembler des informations utiles à l’administration et à l’audit défensif. L’objectif produit est de combiner, dans une interface terminal lisible, l’inventaire local, les diagnostics système et réseau, les contrôles de sécurité à faible impact, puis des vérifications réseau explicitement autorisées.
+Cette version corrige l’échec du lancement initial : les fichiers sont maintenant chargés depuis le répertoire du script et le nom du module de configuration est cohérent. L’interface interactive et les commandes documentées appellent les modules communs. Le menu ne lance plus d’animation d’attente. L’installateur a été testé sous Linux avec un `pkg` simulé; l’exécution sur un appareil Termux réel reste à confirmer.
 
-Le style « terminal hacker » désigne ici une interface sombre et technique. Il ne signifie ni accès non autorisé, ni exploitation, ni contournement. Le produit visé est un outil de diagnostic transparent, contrôlable et documenté.
+Fonctions implémentées :
 
-## Fonctions présentes dans le dépôt
+- informations système et stockage, avec lecture mémoire selon les capacités du système;
+- interfaces réseau et routes locales, si `iproute2` est installé;
+- résolution DNS via `nslookup` ou `getent`;
+- hash SHA-256 via `sha256sum`, `shasum` ou OpenSSL;
+- liste de processus via `ps`;
+- diagnostic `doctor` des dépendances;
+- interface à couleurs néon, désactivée automatiquement hors terminal ou avec `NO_COLOR`.
 
-Les scripts actuels comprennent les fonctions suivantes, sous réserve des problèmes de démarrage décrits ci-dessous :
+La commande `scan` offre maintenant un **test TCP ciblé** sur un hôte et une liste explicites de 1 à 32 ports. Ce n’est ni un scanner de vulnérabilités ni un scan de plages.
 
-- affichage d’informations système;
-- affichage des interfaces et routes réseau;
-- résolution DNS simple;
-- calcul d’empreinte SHA-256 d’un fichier;
-- affichage des processus actifs;
-- menu terminal modulaire.
+**Pas encore implémenté :** scanner de vulnérabilités, balayage de sous-réseau, export JSON, correctifs automatiques. Les sorties de ce projet ne valent pas certification ni audit professionnel.
 
-**Ces fonctions ne constituent pas un scanner de vulnérabilités.** La version du dépôt examinée a notamment une incohérence de casse entre `core/config.sh` et le fichier réellement présent `core/Config.sh`. La configuration et les chemins doivent aussi être rendus indépendants du répertoire courant. Consultez [ANALYSE_PLAN.md](ANALYSE_PLAN.md) avant de vous fier à un lancement ou à un résultat.
+## Installation Termux
 
-## Fonctions envisagées
+Installez Termux depuis [F-Droid](https://f-droid.org/packages/com.termux/) ou sa [page officielle](https://termux.dev/). Ouvrez ensuite Termux et exécutez :
 
-La feuille de route propose de développer progressivement :
+```bash
+pkg update -y
+pkg install -y git
 
-1. **Inventaire et diagnostic** — système, interfaces, routes, DNS, processus et dépendances, en distinguant clairement les données indisponibles.
-2. **Audit local en lecture seule** — contrôles explicables sur les permissions, services, pare-feu et configuration locale, sans appliquer de changements automatiquement.
-3. **Vérifications réseau autorisées** — cible et périmètre fournis explicitement, contrôles prudents, délais et limites définis, aucun scan implicite.
-4. **Rapports reproductibles** — sorties texte et JSON versionnées avec horodatage, sévérité, preuve minimale, limites et recommandations.
-5. **Mode automatisable** — interface en sous-commandes, codes de sortie stables, tests et intégration continue.
+git clone https://github.com/LUST-DEV/LUST-DARv3.git
+cd LUST-DARv3
+bash install-termux.sh
+```
 
-Ces éléments sont des **objectifs**, pas des fonctions déjà disponibles.
+L’installateur vérifie qu’il tourne dans Termux, installe `bash`, `coreutils`, `iproute2`, `dnsutils` et `procps`, copie les modules dans `~/.local/share/lust-dar`, crée la commande `lust-dar` dans `$PREFIX/bin`, puis lance `--version` et `doctor`.
 
-## Installation
+Pour démarrer l’interface :
 
-Dépôt officiel : [github.com/LUST-DEV/LUST-DARv3](https://github.com/LUST-DEV/LUST-DARv3)
+```bash
+lust-dar
+```
+
+Si la commande n’est pas trouvée après l’installation, vérifiez le préfixe et le `PATH` Termux :
+
+```bash
+printf 'PREFIX=%s\nPATH=%s\n' "$PREFIX" "$PATH"
+"$PREFIX/bin/lust-dar" --help
+```
+
+L’installateur doit être relancé depuis une copie complète du dépôt. Il remplace les fichiers de l’installation LUST-DAR sous `~/.local/share/lust-dar` et le lanceur `$PREFIX/bin/lust-dar`; il ne modifie pas vos autres fichiers. L’installation de paquets nécessite une connexion Internet et l’accès normal au gestionnaire `pkg`.
+
+## Installation Linux
+
+Prérequis : Bash 4+, `uname`, `df` et `ps`. Les outils réseau et DNS sont facultatifs et détectés par `doctor`.
 
 ```bash
 git clone https://github.com/LUST-DEV/LUST-DARv3.git
 cd LUST-DARv3
-chmod +x lust-dar
+bash ./lust-dar --help
+bash ./lust-dar doctor
 ```
 
-Le code est en cours de stabilisation. Tant que les tests de lancement et les dépendances ne sont pas documentés et validés, considérez l’exécution comme expérimentale. N’exécutez pas de fonctions sur une cible distante sans avoir vérifié le périmètre et obtenu l’autorisation requise.
-
-### Dépendances annoncées
-
-Le README historique annonce Bash, `iproute2`, `dnsutils` et `curl`. La liste doit être réconciliée avec les appels réels et le contrôle des dépendances n’est pas encore systématique. Les contrôles de hash et de processus peuvent aussi dépendre des utilitaires présents dans le système.
-
-Sur Termux, les paquets de base annoncés sont installables avec :
+L’exécution directe est également possible après `chmod +x lust-dar` :
 
 ```bash
-pkg install bash iproute2 dnsutils curl
+./lust-dar
 ```
 
-## Interface visée
-
-La feuille de route recommande de conserver le menu et d’ajouter une CLI non interactive utilisant les mêmes fonctions. Exemple d’interface **proposée**, non encore garantie comme disponible :
-
-```text
-lust-dar --help
-lust-dar doctor
-lust-dar system info --format text
-lust-dar network info --format json
-lust-dar dns check example.org
-lust-dar file hash ./fichier
-lust-dar audit local --format json
-lust-dar audit target <cible-explicite> --scope <portée-déclarée>
-```
-
-Les sous-commandes `doctor` et `audit` ne doivent être considérées comme disponibles qu’après leur implémentation et validation dans le dépôt.
-
-## Sécurité et usage autorisé
-
-- N’effectuez des vérifications réseau que sur des systèmes que vous possédez ou pour lesquels vous avez une autorisation explicite.
-- Toute future commande distante devra exiger une cible et un périmètre explicites; aucune cible ne sera scannée par défaut.
-- Les valeurs saisies doivent être validées, les commandes shell correctement citées et les erreurs remontées sans exécuter de configuration arbitraire.
-- Les contrôles proposés sont défensifs et à faible impact. Le projet ne vise pas la furtivité, le contournement, l’exploitation de vulnérabilités ou la modification distante de systèmes.
-- Les rapports devront indiquer leurs limites et distinguer un fait observé d’une hypothèse.
-
-## Qualité et objectif de fiabilité
-
-Aucun logiciel ne peut promettre « zéro erreur ». L’objectif professionnel est de rendre les erreurs détectables, compréhensibles et bloquantes avant diffusion : syntaxe vérifiée, analyse statique, tests automatisés, tests de lancement hors du dossier du dépôt, tests de dépendances manquantes et tests réseau confinés à des environnements locaux. La CI et ces critères d’acceptation sont détaillés dans [le plan professionnel](ANALYSE_PLAN.md).
-
-Pour les contributeurs, les premières vérifications prévues sont :
+## Commandes
 
 ```bash
-# Vérifier la syntaxe Bash
-find . -type f \( -name '*.sh' -o -name 'lust-dar' \) -print0 |
+bash ./lust-dar --help
+bash ./lust-dar --version
+bash ./lust-dar doctor
+bash ./lust-dar system
+bash ./lust-dar network
+bash ./lust-dar dns example.org
+bash ./lust-dar hash ./chemin/vers/fichier
+bash ./lust-dar processes
+bash ./lust-dar scan 127.0.0.1 22,80,443
+```
+
+Pour une installation Termux, remplacez `bash ./lust-dar` par `lust-dar`. Sans arguments dans un terminal interactif, l’application ouvre le menu. Sans arguments et sans terminal, elle affiche l’aide et sort avec un code non nul.
+
+Pour désactiver les couleurs :
+
+```bash
+NO_COLOR=1 bash ./lust-dar system
+```
+
+La commande `scan` tente une connexion TCP par port fourni, avec un délai de 2 secondes par port. Elle accepte un seul hôte explicite et au maximum 32 ports séparés par des virgules; elle ne balaye ni plage d’hôtes ni plage de ports. Les ports non accessibles peuvent être fermés, filtrés ou simplement trop lents : le programme ne peut pas distinguer ces cas.
+
+## Interface néon
+
+L’interface utilise des séquences ANSI 256 couleurs lorsqu’elle détecte un terminal interactif. Les sorties redirigées restent sans code couleur; `NO_COLOR=1` permet aussi une sortie sobre. Le style est « glass-inspired » par sa palette sombre/cyan, mais le terminal n’offre pas de transparence graphique réelle.
+
+## Dépannage Termux
+
+- **`pkg: command not found`** : l’installateur n’a pas été lancé dans Termux. Ne lancez pas `install-termux.sh` sous Linux.
+- **`lust-dar: command not found`** : utilisez `"$PREFIX/bin/lust-dar" --help` et vérifiez que `$PREFIX/bin` figure dans `PATH`.
+- **`ip: commande introuvable`** : `pkg install iproute2`.
+- **Pas de `nslookup`** : `pkg install dnsutils`.
+- **Pas de `ps` ou de `sha256sum`** : `pkg install procps coreutils`.
+- **Commande `timeout` absente pour `scan`** : `pkg install coreutils`.
+- **Menu peu lisible** : utilisez un terminal compatible ANSI 256 couleurs; pour supprimer les couleurs, définissez `NO_COLOR=1`.
+
+## Sécurité et périmètre
+
+N’effectuez des vérifications que sur des systèmes dont vous êtes propriétaire ou pour lesquels vous avez une autorisation. `scan` est une fonction distante limitée : cible et ports sont obligatoires et le nombre de ports est plafonné à 32. Elle ne réalise aucun exploit. Les futurs contrôles devront également exiger une portée explicite et des limites raisonnables.
+
+## Vérifications pour les contributeurs
+
+```bash
+find . -type f \( -name '*.sh' -o -name 'lust-dar' -o -name 'install-termux.sh' \) -print0 |
   xargs -0 -r -n1 bash -n
-
-# À activer après l’ajout des outils de test
-shellcheck lust-dar core/*.sh modules/*.sh
-bats tests/
 ```
 
-## Plateformes
+Les tests d’intégration sont dans `tests/test_cli.sh`; la CI GitHub Actions exécute la syntaxe Bash, ShellCheck et ces tests. L’installateur Termux est simulé dans la suite; il reste à le valider sur un appareil Android. Les futurs tests réseau devront être confinés à loopback/lab.
 
-Le projet annonce Linux et Termux. Cette compatibilité doit encore être réellement vérifiée, en particulier les chemins d’exécutables et les différences entre utilitaires GNU et Android/Termux. Les versions prises en charge seront précisées une fois la matrice de tests en place.
+## Icônes officielles et ressources
 
-## Icône et badges
+- [Dépôt GitHub officiel](https://github.com/LUST-DEV/LUST-DARv3) — badge GitHub avec logo officiel fourni par Shields.io.
+- [GNU Bash](https://www.gnu.org/software/bash/) — badge Bash.
+- [Termux](https://termux.dev/) et [F-Droid](https://f-droid.org/packages/com.termux/) — téléchargement et documentation Termux.
+- [Font Awesome — Shield Halved](https://fontawesome.com/icons/shield-halved) — fiche officielle de l’icône bouclier; vérifier ses conditions avant toute redistribution du fichier d’icône.
+- [Shields.io](https://shields.io/) — service des badges affichés dans ce README.
 
-- Icône bouclier officielle : [Font Awesome — Shield Halved](https://fontawesome.com/icons/shield-halved). Consultez la licence de l’icône avant de l’intégrer ou de la redistribuer comme fichier du projet.
-- Badges de README : [Shields.io](https://shields.io/). Les badges ci-dessus indiquent la technologie et le statut du projet; ils ne prétendent pas que les tests ou audits sont déjà passés.
-- Image du README : fichier fourni par le mainteneur et conservé dans [`assets/lust-dar-banner.jpg`](assets/lust-dar-banner.jpg). Vérifiez les droits de réutilisation avant redistribution.
-
-## Contribution
-
-Les contributions sont bienvenues une fois les règles de contribution et la CI ajoutées. Pour une proposition, veuillez inclure le problème résolu, les plateformes concernées, les tests exécutés et tout effet sur la portée ou les dépendances. Les fonctions réseau doivent préciser le périmètre requis, le niveau d’impact et les comportements de sécurité par défaut.
+La bannière a été fournie par le mainteneur. Les droits de réutilisation doivent être vérifiés avant redistribution.
 
 ## Licence
 
-Aucun fichier de licence n’a été détecté dans le dépôt lors de l’analyse. **Le code n’est pas à considérer comme librement réutilisable tant que le mainteneur n’a pas choisi et ajouté une licence.**
-
-## Références
-
-- [Dépôt GitHub officiel](https://github.com/LUST-DEV/LUST-DARv3)
-- [Documentation GNU Bash](https://www.gnu.org/software/bash/manual/)
-- [Shields.io](https://shields.io/)
-- [Icône Font Awesome — Shield Halved](https://fontawesome.com/icons/shield-halved)
+Aucun fichier `LICENSE` n’est présent à ce jour. En l’absence de licence, ne présumez pas que le code peut être réutilisé ou redistribué librement. Le mainteneur doit choisir et ajouter une licence.

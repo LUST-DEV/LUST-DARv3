@@ -1,18 +1,55 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/usr/bin/env bash
+set -o pipefail
 
-source core/config.sh
-source core/boot.sh
-source core/menu.sh
-
-source modules/system.sh
-source modules/network.sh
-source modules/dns.sh
-source modules/hash.sh
-source modules/process.sh
-
-boot
-
-while true
-do
-menu
+APP_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)" || exit 1
+for library in "$APP_DIR/core/config.sh" "$APP_DIR/core/menu.sh" "$APP_DIR/modules/system.sh" "$APP_DIR/modules/network.sh" "$APP_DIR/modules/dns.sh" "$APP_DIR/modules/hash.sh" "$APP_DIR/modules/process.sh" "$APP_DIR/modules/scan.sh"; do
+  if [[ ! -r "$library" ]]; then
+    printf 'Erreur : fichier requis introuvable : %s\n' "$library" >&2
+    exit 1
+  fi
+  # shellcheck source=/dev/null
+  source "$library" || exit 1
 done
+
+usage() {
+  cat <<'HELP'
+LUST-DAR — terminal d'information et de diagnostic local
+
+Usage:
+  lust-dar                         Ouvrir le menu interactif
+  lust-dar --help | -h             Afficher cette aide
+  lust-dar --version               Afficher la version
+  lust-dar doctor                  Verifier les prerequis disponibles
+  lust-dar system                  Afficher les informations système
+  lust-dar network                 Afficher interfaces et routes locales
+  lust-dar dns <nom>               Résoudre un nom de domaine
+  lust-dar hash <fichier>          Calculer le SHA-256 d'un fichier
+  lust-dar processes               Afficher les processus accessibles
+  lust-dar scan <hote> <ports>     Tester jusqu'a 32 ports TCP explicites
+
+Les commandes sont locales ou passives, sauf scan qui exige une cible et des
+ports explicites. N'effectuez des vérifications que sur des systemes autorises.
+HELP
+}
+
+case "${1:-}" in
+  -h|--help) usage; exit 0 ;;
+  --version|-V) printf '%s %s\n' "$APP_NAME" "$APP_VERSION"; exit 0 ;;
+  doctor) doctor; exit $? ;;
+  system) system_info; exit $? ;;
+  network) network_info; exit $? ;;
+  dns)
+    if [[ $# -ne 2 ]]; then printf 'Usage : lust-dar dns <nom>\n' >&2; exit 2; fi
+    dns_lookup "$2"; exit $? ;;
+  hash)
+    if [[ $# -ne 2 ]]; then printf 'Usage : lust-dar hash <fichier>\n' >&2; exit 2; fi
+    file_hash "$2"; exit $? ;;
+  processes) process_view; exit $? ;;
+  scan)
+    if [[ $# -ne 3 ]]; then printf 'Usage : lust-dar scan <hote> <ports-comma-separes>\n' >&2; exit 2; fi
+    scan_target "$2" "$3"; exit $? ;;
+  '')
+    if [[ ! -t 0 ]]; then usage >&2; exit 2; fi
+    menu ;;
+  *) printf 'Commande inconnue : %s\n' "$1" >&2; usage >&2; exit 2 ;;
+esac

@@ -147,3 +147,16 @@ La bannière a été fournie par le mainteneur. Les droits de réutilisation doi
 ## Licence
 
 Aucun fichier `LICENSE` n’est présent à ce jour. En l’absence de licence, ne présumez pas que le code peut être réutilisé ou redistribué librement. Le mainteneur doit choisir et ajouter une licence.
+
+## Guide rapide pour contribuer
+
+Pour proposer une amélioration, créez une branche dédiée et décrivez clairement la portée de votre changement dans une Pull Request. Les modifications de documentation, les correctifs de tests et les améliorations limitées au périmètre autorisé sont les bienvenus.
+
+Avant d’envoyer une Pull Request, vérifiez la syntaxe des scripts Bash et exécutez la suite de tests lorsqu’elle est disponible :
+
+```bash
+find . -type f \( -name '*.sh' -o -name 'lust-dar' -o -name 'install-termux.sh' \) -print0 | xargs -0 -r -n1 bash -n
+bash tests/test_cli.sh
+```
+
+Merci de ne lancer les fonctions de diagnostic et de scan que sur des systèmes dont vous êtes propriétaire ou pour lesquels vous avez une autorisation explicite.

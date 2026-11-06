@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/lust-dar-banner.jpg" alt="Bannière LUST-DAR fournie par le mainteneur" width="500">
+  <img src="assets/lust-dar-banner.jpg" alt="Bannière LUST-DAR V3 fournie par le mainteneur" width="500">
 
   <h1>LUST-DAR</h1>
   <p><strong>Terminal néon pour inventaire et diagnostics locaux</strong></p>
